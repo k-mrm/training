@@ -6,15 +6,29 @@
 
 #define NULL ((void *)0)
 
+void output(char *s, off_t len) {
+    ssize_t n = 0;
+    do {
+        n += write(STDOUT_FILENO, s + n, len);
+    } while(n < len);
+}
+
 char *read_file(int fd, off_t *len) {
     struct stat st;
     if(fd < 0) {
         return NULL;
     }
     fstat(fd, &st);
+    if(S_ISDIR(st.st_mode)) {
+        return NULL;
+    }
     *len = st.st_size;
 
     return mmap(NULL, st.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+}
+
+int cat_main_stdin() {
+    ;
 }
 
 int cat_main(int argc, char **argv) {
@@ -27,7 +41,7 @@ int cat_main(int argc, char **argv) {
             exitcode = 1;
             continue;
         }
-        write(STDOUT_FILENO, (void *)p, len);
+        output(p, len);
         close(fd);
         munmap(p, len);
     }
@@ -37,8 +51,7 @@ int cat_main(int argc, char **argv) {
 
 int main(int argc, char **argv) {
     if(argc == 1) {
-        /* TODO */
-        return 0;
+        return cat_main_stdin();
     }
     else {
         return cat_main(argc, argv);
