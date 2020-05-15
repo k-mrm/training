@@ -18,7 +18,7 @@ char *read_file(int fd, off_t *len) {
 }
 
 int cat_main(int argc, char **argv) {
-    int exitcode;
+    int exitcode = 0;
     off_t len;
     for(int i = 0; i < argc; ++i) {
         int fd = open(argv[i + 1], O_RDONLY);
